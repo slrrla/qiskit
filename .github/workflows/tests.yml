@@ -26,7 +26,7 @@ jobs:
           python -m pip install -e .
       - name: Run tests multiple times
         run: |
-          for i in {1..5}; do
+          for i in {1..1000}; do
             echo "Starting test run #$i for Python ${{ matrix.python-version }}"
             stestr run || exit 1
           done
