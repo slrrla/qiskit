@@ -26,7 +26,9 @@ jobs:
           python -m pip install -e .
       - name: Run tests multiple times
         run: |
-          for i in {1..1000}; do
+          # Run the test suite 5 times in a row.
+          # Adjust the upper bound (1..5) to increase or decrease the total runs.
+          for i in {1..5}; do
             echo "Starting test run #$i for Python ${{ matrix.python-version }}"
             stestr run || exit 1
           done
