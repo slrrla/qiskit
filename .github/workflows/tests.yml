@@ -8,27 +8,40 @@ on:
 
 jobs:
   tests:
+    # Always run in your fork
     if: always()
+    
+    # We use macOS-14 with an arm64 Python architecture
     runs-on: macOS-14
+
+    # Matrix config: 2 python versions × 10 chunks = 20 parallel jobs
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.10", "3.13"]
+        chunk: [1,2,3,4,5,6,7,8,9,10]
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Check out repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
           architecture: arm64
+
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           python -m pip install -U -r requirements.txt
           python -m pip install -U -r requirements-dev.txt
           python -m pip install -e .
+
       - name: Run tests multiple times
         run: |
-          # Run the test suite 5 times in a row.
-          # Adjust the upper bound (1..5) to increase or decrease the total runs.
+          # Each job runs the test suite 5 times
           for i in {1..5}; do
-            echo "Starting test run #$i for Python ${{ matrix.python-version }}"
+            echo "Chunk ${{ matrix.chunk }} (Python ${{ matrix.python-version }}): Test run #$i"
             stestr run || exit 1
           done
