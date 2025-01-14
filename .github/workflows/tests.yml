@@ -41,7 +41,7 @@ jobs:
       - name: Run tests multiple times
         run: |
           # Each job runs the test suite 5 times
-          for i in {1..5}; do
-            echo "Chunk ${{ matrix.chunk }} (Python ${{ matrix.python-version }}): Test run #$i"
+          for i in {1..10}; do
+            echo "Chunk ${ matrix.chunk }} (Python ${{ matrix.python-version }}): Test run #$i"
             stestr run || exit 1
           done
