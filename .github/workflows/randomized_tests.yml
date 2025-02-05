@@ -1,7 +1,7 @@
 name: Randomized tests
 on:
   schedule:
-    - cron:  '42 3 * * *'
+    - cron: '42 3 * * *'
   workflow_dispatch:
 jobs:
   randomized_tests:
@@ -24,8 +24,11 @@ jobs:
             coveralls \
             qiskit-aer \
             -e .
-      - name: Run randomized tests
-        run: make test_randomized
+          # pytest와 재실행 플러그인이 requirements에 없다면 아래도 설치
+          python -m pip install pytest pytest-rerunfailures
+      - name: Run randomized tests with flakiness detection
+        run: |
+          make test_randomized ARGS="--reruns 3 --reruns-delay 5"
         env:
           RUST_BACKTRACE: 1
       - name: Create comment on failed test run
