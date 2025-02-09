@@ -28,7 +28,7 @@ jobs:
             qiskit-aer \
             -e .
           # 명시적으로 Pillow 설치
-          python -m pip install Pillow
+          python -m pip install Pillow matplotlib
           # pytest와 관련 플러그인 설치
           python -m pip install pytest pytest-repeat pytest-rerunfailures
 
