@@ -8,3 +8,4 @@ stevedore>=3.0.0
 typing-extensions
 symengine>=0.11
 Pillow>=8.0.0
+graphviz>=0.13
