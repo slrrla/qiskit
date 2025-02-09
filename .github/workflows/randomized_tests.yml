@@ -24,7 +24,7 @@ jobs:
             -c constraints.txt \
             -r requirements.txt \
             -r requirements-dev.txt \
-            -r requirements-optical.txt \
+            -r requirements-optional.txt \
             coveralls \
             qiskit-aer \
             -e .
