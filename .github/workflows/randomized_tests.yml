@@ -1,9 +1,7 @@
 name: Randomized tests
 on:
-  push:
-  pull_request:
   schedule:
-    - cron: '42 3 * * *'
+    - cron:  '42 3 * * *'
   workflow_dispatch:
 jobs:
   randomized_tests:
@@ -11,12 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         name: Install Python
         with:
           python-version: '3.8'
-
       - name: Install dependencies
         run: |
           python -m pip install -U pip setuptools wheel
@@ -24,25 +20,19 @@ jobs:
             -c constraints.txt \
             -r requirements.txt \
             -r requirements-dev.txt \
-            -r requirements-optional.txt \
             coveralls \
             qiskit-aer \
             -e .
-          # 명시적으로 Pillow 설치
-          python -m pip install Pillow matplotlib
-          # pytest와 관련 플러그인 설치
-          python -m pip install pytest pytest-repeat pytest-rerunfailures
-
-      - name: Check Pillow installation
-        run: python -c "import PIL; print('Pillow version:', PIL.__version__)"
-      - name: Install Graphviz
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y graphviz
-      
-      - name: Run randomized tests with flaky detection
-        run: |
-          # 전체 테스트를 100회 반복 실행
-          pytest --count=100 --reruns 3 --reruns-delay 5 --verbose
+      - name: Run randomized tests
+        run: make test_randomized
         env:
           RUST_BACKTRACE: 1
+      - name: Create comment on failed test run
+        if: ${{ failure() }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: 2645
+          body: |
+            Randomized tests failed at commit ${{ github.sha }}.
+
+            _Logs_: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}.
