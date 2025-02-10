@@ -1,8 +1,11 @@
 name: Randomized tests
 on:
+  push:
+  pull_request:
   schedule:
-    - cron:  '42 3 * * *'
+    - cron: '42 3 * * *'
   workflow_dispatch:
+
 jobs:
   randomized_tests:
     if: github.repository_owner == 'Qiskit'
