@@ -1,7 +1,9 @@
 name: Randomized tests
 on:
+  push:
+  pull_request:
   schedule:
-    - cron:  '42 3 * * *'
+    - cron: '42 3 * * *'
   workflow_dispatch:
 jobs:
   randomized_tests:
@@ -20,9 +22,14 @@ jobs:
             -c constraints.txt \
             -r requirements.txt \
             -r requirements-dev.txt \
+            -r requirements-optional.txt \
             coveralls \
             qiskit-aer \
             -e .
+          # 명시적으로 Pillow 설치
+          python -m pip install Pillow matplotlib
+          # pytest와 관련 플러그인 설치
+          python -m pip install pytest pytest-repeat pytest-rerunfailures
       - name: Run randomized tests
         run: make test_randomized
         env:
