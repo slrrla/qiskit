@@ -35,7 +35,11 @@ jobs:
 
       - name: Check Pillow installation
         run: python -c "import PIL; print('Pillow version:', PIL.__version__)"
-
+      - name: Install Graphviz
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz
+      
       - name: Run randomized tests with flaky detection
         run: |
           # 전체 테스트를 100회 반복 실행
