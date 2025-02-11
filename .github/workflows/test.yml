@@ -10,7 +10,7 @@ jobs:
     if: always()
     # This job runs first
     name: "macOS-arm64-tests-Python-3.8"
-    runs-on: macOS-14
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -26,7 +26,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.8"
-          architecture: arm64
 
       - name: "Install dependencies"
         run: |
