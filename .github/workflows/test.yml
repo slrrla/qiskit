@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        chunks: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+        chunks: [1]
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -42,10 +42,14 @@ jobs:
       - name: "Run tests"
         continue-on-error: true
         run: |
+
+        # 10 runs 
           EXIT_CODE=0
-          for i in {1..5}; do
+          for i in {1..100}; do
             echo "Chunk ${{ matrix.chunks }} (Python 3.9): Test run #$i"
             stestr run || EXIT_CODE=1
           done
           exit
+
+      
       
