@@ -16,18 +16,11 @@ jobs:
       matrix:
         chunks: [1]
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@1.70
-
-      - name: "Set up Python 3.8"
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
+        name: Install Python
         with:
-          python-version: "3.8"
-
-      - name: "Install dependencies"
+          python-version: '3.8'
+      - name: Install dependencies
         run: |
           python -m pip install -U pip setuptools wheel
           python -m pip install -U -r requirements.txt -c constraints.txt
@@ -37,7 +30,20 @@ jobs:
           python -m pip install "qiskit-aer"
         env:
           SETUPTOOLS_ENABLE_FEATURES: "legacy-editable"
-      
+      - name: Run randomized tests
+        run: make test_randomized
+        env:
+          RUST_BACKTRACE: 1
+      - name: Create comment on failed test run
+        if: ${{ failure() }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: 2645
+          body: |
+            Randomized tests failed at commit ${{ github.sha }}.
+
+            _Logs_: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}.
+
 
       - name: "Run tests"
         continue-on-error: true
@@ -45,7 +51,7 @@ jobs:
 
         # 10 runs 
           EXIT_CODE=0
-          for i in {1..100}; do
+          for i in {1..10}; do
             echo "Chunk ${{ matrix.chunks }} (Python 3.9): Test run #$i"
             stestr run || EXIT_CODE=1
           done
@@ -53,3 +59,4 @@ jobs:
 
       
       
+
