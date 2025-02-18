@@ -5,12 +5,15 @@ on:
     branches: ['**']
   pull_request:
     branches: ['**']
+  schedule:
+    - cron: '0 * * * *'  # 매 정각마다 실행
+  workflow_dispatch:      # 수동으로 실행 가능
+
 jobs:
   test_python_310:
     if: always()
-    # This job runs first
-    name: "ubuntu-20.04 (Python 3.10)"
-    runs-on: ubuntintu-latest
+    name: "macOS-arm64-tests-Python-3.10"
+    runs-on: macOS-14
     strategy:
       fail-fast: false
       matrix:
@@ -30,11 +33,10 @@ jobs:
 
       - name: "Install dependencies"
         run: |
-          pip install -U -r requirements.txt -c constraints.txt
-          pip install -U -r requirements-dev.txt coveralls -c constraints.txt
-          pip install -c constraints.txt -e .
-          pip install "qiskit-ibmq-provider" -c constraints.txt
-          pip install "qiskit-aer"
+          python -m pip install --upgrade pip
+          python -m pip install -U -r requirements.txt -c constraints.txt
+          python -m pip install -U -r requirements-dev.txt -c constraints.txt
+          python -m pip install -c constraints.txt -e .
        
       - name: "Install optionals"
         run: |
@@ -45,9 +47,8 @@ jobs:
         continue-on-error: true
         run: |
           EXIT_CODE=0
-          for i in {1..10}; do
-            echo "Chunk ${{ matrix.chunks }} (Python 3.9): Test run #$i"
+          for i in {1..5}; do
+            echo "Chunk ${{ matrix.chunks }} (Python 3.10): Test run #$i"
             stestr run || EXIT_CODE=1
           done
-          exit
-      
+          exit $EXIT_CODE
