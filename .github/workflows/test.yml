@@ -8,7 +8,6 @@ on:
 jobs:
   test_python_310:
     if: always()
-    # This job runs first
     name: "ubuntu-18.04 (Python 3.08)"
     runs-on: ubuntu-18.04
     strategy:
@@ -30,7 +29,8 @@ jobs:
 
       - name: "Install dependencies"
         run: |
-          pip install -U -r requirements.txt -c constraints.txt
+        
+          pip install --no-use-pep517 -r requirements.txt
           pip install -U -r requirements-dev.txt coveralls -c constraints.txt
           pip install -c constraints.txt -e .
           pip install "qiskit-ibmq-provider" -c constraints.txt
