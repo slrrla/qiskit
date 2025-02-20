@@ -9,8 +9,8 @@ jobs:
   test_python_310:
     if: always()
     # This job runs first
-    name: "macOS-arm64-tests-Python-3.10"
-    runs-on: macOS-14
+    name: "ubuntu-latest3.10"
+    runs-on: "ubuntu-latest3.10"
     strategy:
       fail-fast: false
       matrix:
