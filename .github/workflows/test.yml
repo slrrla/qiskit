@@ -25,14 +25,13 @@ jobs:
       - name: "Set up Python 3.10"
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          ython-version: ${{ matrix.python-version }}
+          architecture: arm64
       - name: "Install dependencies"
         run: |
-        # can change according to requriements
           python -m pip install -U -r requirements.txt -c constraints.txt
           python -m pip install -U -r requirements-dev.txt coveralls -c constraints.txt
           python -m pip install -c constraints.txt -e .
-         
         env:
           SETUPTOOLS_ENABLE_FEATURES: "legacy-editable"
       
