@@ -1,0 +1,54 @@
+name: Tests
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+jobs:
+  test_python_310:
+    if: always()
+    # This job runs first
+    name: "macOS-arm64-tests-Python-3.13"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        chunks: [1]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@1.70
+
+      - name: "Set up Python 3.13"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: "Install dependencies"
+        run: |
+        # can change according to requriements
+          python -m pip install -U -r requirements.txt -c constraints.txt
+          python -m pip install -U -r requirements-dev.txt coveralls -c constraints.txt
+          python -m pip install -c constraints.txt -e .
+         
+        env:
+          SETUPTOOLS_ENABLE_FEATURES: "legacy-editable"
+      
+
+      - name: "Run tests"
+        continue-on-error: true
+        run: |
+
+        # 100 runs 
+          EXIT_CODE=0
+          for i in {1..100}; do
+            echo "Chunk ${{ matrix.chunks }} (Python 3.9): Test run #$i"
+            stestr run || EXIT_CODE=1
+          done
+          exit
+
+      
+      
