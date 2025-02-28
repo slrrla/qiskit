@@ -14,6 +14,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+      
+        python-version: ["3.10"]
         chunks: [1]
     steps:
       - name: Check out repository
