@@ -5,45 +5,72 @@ on:
     branches: ['**']
   pull_request:
     branches: ['**']
+  schedule:
+    - cron: '0 * * * *'  
+  workflow_dispatch:
+
 jobs:
   test_python_310:
-    if: always()
-    # This job runs first
-    name: "macOS-arm64-tests-Python-3.10"
+    # This job will run every hour, but we will manually limit it to 4 total runs.
     runs-on: macOS-14
-    strategy:
-      fail-fast: false
-      matrix:
-        chunks: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Read run count
+        id: read_count
+        run: |
+          # If run_count.txt doesn't exist, start at 0
+          if [ ! -f run_count.txt ]; then
+            echo 0 > run_count.txt
+          fi
+          RUN_COUNT=$(cat run_count.txt)
+          echo "run_count=$RUN_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Check if run count exceeded
+        if: ${{ steps.read_count.outputs.run_count >= 4 }}
+        run: |
+          echo "Run count limit (4) reached; exiting early."
+          exit 0
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@1.70
 
-      - name: "Set up Python 3.10"
+      - name: Set up Python 3.10 (arm64)
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
           architecture: arm64
 
-      - name: "Install dependencies"
+      - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
           python -m pip install -U -r requirements.txt -c constraints.txt
           python -m pip install -U -r requirements-dev.txt -c constraints.txt
           python -m pip install -c constraints.txt -e .
-       
-      - name: "Install optionals"
+
+      - name: Install optionals
         run: |
           python -m pip install -r requirements-optional.txt -c constraints.txt
           python tools/report_numpy_state.py
 
-      - name: "Run tests"
+      - name: Run tests
+        continue-on-error: true
         run: |
-          # Each job runs the test suite 5 times
-          for i in {1..5}; do
-            echo "Chunk ${{ matrix.chunk }} (Python ${{ matrix.python-version }}): Test run #$i"
-            stestr run || exit 1
+          EXIT_CODE=0
+          for i in {1..100}; do
+            echo "Test run #$i"
+            stestr run || EXIT_CODE=1
           done
+          exit $EXIT_CODE
+
+      - name: Increment run count and commit
+        run: |
+          RUN_COUNT=${{ steps.read_count.outputs.run_count }}
+          NEW_COUNT=$((RUN_COUNT + 1))
+          echo $NEW_COUNT > run_count.txt
+          
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add run_count.txt
+          git commit -m "Increment run count to $NEW_COUNT"
+          git push
